@@ -2,7 +2,7 @@
 
 Automatically detect the intent of your code changes when saving files. This extension analyzes git diffs and predicts whether your changes represent a bug fix, new feature, refactor, risky commit, or documentation update.
 
-![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-1.107.0+-green.svg)
 
 ## Screenshots & Demo
