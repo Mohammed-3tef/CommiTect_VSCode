@@ -7,7 +7,8 @@ Automatically detect the intent of your code changes when saving files. This ext
 
 ## Screenshots & Demo
 
-<video src="public/demo.mp4" autoplay loop muted playsinline width="100%"></video>
+<img src="public/demo.gif" alt="Demo Gif" width="100%"/>
+
 *Live demo showing Commit Intent Detector analyzing changes and displaying the detected intent in real time.*
 
 ![Notification showing detected commit intent](public/notification.png)

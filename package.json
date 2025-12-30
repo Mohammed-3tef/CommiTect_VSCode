@@ -2,7 +2,7 @@
   "name": "commit-intent-detector",
   "displayName": "Commit Intent Detector",
   "description": "Automatically detects commit intent when you save files using an external backend API, showing notifications with predicted intent categories.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "galleryBanner": {
     "color": "#001d3d",
     "theme": "dark"
