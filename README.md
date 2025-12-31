@@ -1,8 +1,8 @@
 # Commit Intent Detector
 
-Automatically detect the intent of your code changes when saving files. This extension analyzes git diffs and predicts whether your changes represent a bug fix, new feature, refactor, risky commit, or documentation update.
+Automatically analyzes your code changes on file save and suggests a clear, professional commit name (Bug Fix, Feature, Refactor, Docs, Tests) using an external backend API.
 
-![Version](https://img.shields.io/badge/version-1.0.2-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.3-blue.svg)
 ![VS Code](https://img.shields.io/badge/VS%20Code-1.107.0+-green.svg)
 
 ## Screenshots & Demo
@@ -43,7 +43,7 @@ Automatically detect the intent of your code changes when saving files. This ext
 Configure in VS Code settings (`File > Preferences > Settings`):
 
 * `commitIntentDetector.enabled` - Enable/disable the extension (default: `true`)
-* `commitIntentDetector.apiUrl` - Backend API endpoint (default: `https://localhost:7183/api/Commit/analyze`)
+* `commitIntentDetector.apiUrl` - Backend API endpoint (default: `http://commitintentdetector.runasp.net/api/Commit/analyze`)
 * `commitIntentDetector.timeout` - API request timeout in ms (default: `30000`)
 * `commitIntentDetector.debounceDelay` - Delay before processing saves in ms (default: `1000`)
 * `commitIntentDetector.showStatusBar` - Show status bar indicator (default: `true`)
