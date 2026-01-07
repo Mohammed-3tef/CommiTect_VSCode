@@ -105,8 +105,8 @@ This extension sends git diff content to your configured backend API for analysi
 
 ## Support
 
-- Report issues: [GitHub Issues](https://github.com/Mohammed-3tef/Commit_Intent_Detector/issues)
-- Source code: [GitHub Repository](https://github.com/Mohammed-3tef/Commit_Intent_Detector)
+- Report issues: [GitHub Issues](https://github.com/Mohammed-3tef/CommiTect_VSCode/issues)
+- Source code: [GitHub Repository](https://github.com/Mohammed-3tef/CommiTect_VSCode)
 
 ## License
 

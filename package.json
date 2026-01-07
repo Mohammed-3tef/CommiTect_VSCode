@@ -93,7 +93,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Mohammed-3tef/Commit_Intent_Detector.git"
+    "url": "https://github.com/Mohammed-3tef/CommiTect_VSCode.git"
   },
   "author": "Mohammed Atef",
   "license": "MIT",
@@ -102,7 +102,7 @@
   "icon": "public/icon512.png",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Mohammed-3tef/Commit_Intent_Detector/issues"
+    "url": "https://github.com/Mohammed-3tef/CommiTect_VSCode/issues"
   },
-  "homepage": "https://github.com/Mohammed-3tef/Commit_Intent_Detector#readme"
+  "homepage": "https://github.com/Mohammed-3tef/CommiTect_VSCode#readme"
 }
