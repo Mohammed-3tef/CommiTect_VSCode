@@ -52,17 +52,20 @@ function showIntentNotification(intentType, intentMessage) {
 
 /**
  * Process and display the detected commit intent
- * @param {string} intent - The raw intent string from API
+ * @param {string} intent - The raw intent string from API or fallback
+ * @param {boolean} usedFallback - Whether fallback generator was used
  */
-function processAndDisplayIntent(intent) {
+function processAndDisplayIntent(intent, usedFallback = false) {
   const { type, message } = parseIntent(intent);
   
   if (type && message) {
-    showIntentNotification(type, message);
-    updateStatusBar(`${type}: ${message}`, 'commitect.generateCommitMessage');
+    const displayType = usedFallback ? `${type}` : type;
+    showIntentNotification(displayType, message);
+    updateStatusBar(`${displayType}: ${message}`, 'commitect.generateCommitMessage');
   } else {
     // Fallback to showing raw intent if parsing fails
-    showIntentNotification('Commit Intent', intent);
+    const displayPrefix = usedFallback ? 'Commit Intent (Local)' : 'Commit Intent';
+    showIntentNotification(displayPrefix, intent);
     updateStatusBar(`$(check) ${intent}`, 'commitect.generateCommitMessage');
   }
   

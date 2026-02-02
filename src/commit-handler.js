@@ -8,6 +8,7 @@ const { getGitRepositoryRoot, hasChanges, getAllRepositoryDiff, getChangesSummar
 const { analyzeCommitIntent } = require('./api-client');
 const { updateStatusBar, hideStatusBar } = require('./status-bar');
 const { processAndDisplayIntent } = require('./intent-processor');
+const { generateFallbackCommit } = require('./fallback-commit-generator');
 
 /**
  * Handle manual trigger for commit message generation
@@ -90,12 +91,31 @@ async function handleManualTrigger() {
 
     updateStatusBar('$(sync~spin) Generating commit message...', undefined);
 
-    // Analyze the diff with the API
-    const intent = await analyzeCommitIntent(diff, config);
-    console.log('Detected intent:', intent);
+    // Try to analyze the diff with the API, with fallback on failure
+    let intent;
+    let usedFallback = false;
+    
+    try {
+      intent = await analyzeCommitIntent(diff, config);
+      console.log('Detected intent from API:', intent);
+    } catch (apiError) {
+      console.warn('API failed, using fallback commit generator:', apiError.message);
+      
+      // Generate fallback commit message
+      intent = generateFallbackCommit(diff, summary);
+      usedFallback = true;
+      
+      console.log('Generated fallback intent:', intent);
+      
+      // Show a subtle notification that fallback was used
+      vscode.window.showWarningMessage(
+        'API unavailable, using local commit analysis',
+        'Dismiss'
+      );
+    }
 
     // Display the result
-    processAndDisplayIntent(intent);
+    processAndDisplayIntent(intent, usedFallback);
 
   } catch (error) {
     console.error('Error generating commit message:', error);
