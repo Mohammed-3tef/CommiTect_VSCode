@@ -41,7 +41,7 @@ Automatically analyzes your code changes and suggests a clear, professional comm
 ### Three Ways to Generate Commit Messages:
 
 1. **Keyboard Shortcut** (Recommended)
-   - Press `Shift+C` from anywhere in VS Code
+   - Press `Alt+C` from anywhere in VS Code
    
 2. **Status Bar Button**
    - Click the `$(git-commit) CommiTect` button in the status bar (bottom-right)
@@ -92,7 +92,7 @@ Supported intents: `Bug Fix`, `Feature`, `Refactor`, `Risky Commit`, `Documentat
 
 ## Keyboard Shortcut Customization
 
-The default keyboard shortcut is `Shift+C`. To customize it:
+The default keyboard shortcut is `Alt+C`. To customize it:
 
 1. Open Keyboard Shortcuts (`Ctrl+K Ctrl+S` or `Cmd+K Cmd+S` on Mac)
 2. Search for "CommiTect: Generate Commit Message"
