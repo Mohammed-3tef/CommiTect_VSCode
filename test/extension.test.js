@@ -5,8 +5,7 @@ suite('Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
 
   test('Extension should be present', () => {
-    assert.ok(vscode.extensions.getExtension('commit-intent-detector') !== undefined ||
-              vscode.extensions.getExtension('commit-intent-detector.commit-intent-detector') !== undefined,
+    assert.ok(vscode.extensions.getExtension('MohammedAtef.commit-intent-detector') !== undefined,
               'Extension should be loaded');
   });
 

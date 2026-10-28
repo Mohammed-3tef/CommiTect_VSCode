@@ -51,7 +51,7 @@ async function analyzeCommitIntent(diff, config) {
             }
           });
           console.warn('WARNING: SSL certificate verification is disabled. This should only be used for development with self-signed certificates!');
-        } catch (error) {
+        } catch {
           throw new Error('Failed to load undici module. Please run "npm install" to install dependencies.');
         }
       }

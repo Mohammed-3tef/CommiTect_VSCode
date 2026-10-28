@@ -17,10 +17,11 @@ function parseIntent(intent) {
   let intentMessage = '';
 
   for (const line of lines) {
-    if (line.startsWith('Intent:')) {
-      intentType = line.replace('Intent:', '').trim();
-    } else if (line.startsWith('Message:')) {
-      intentMessage = line.replace('Message:', '').trim();
+    const normalizedLine = line.trim();
+    if (normalizedLine.startsWith('Intent:')) {
+      intentType = normalizedLine.slice('Intent:'.length).trim();
+    } else if (normalizedLine.startsWith('Message:')) {
+      intentMessage = normalizedLine.slice('Message:'.length).trim();
     }
   }
 

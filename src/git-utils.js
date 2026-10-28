@@ -2,11 +2,13 @@
  * Git repository utilities
  */
 
-const { exec } = require('child_process');
+const { exec, execFile } = require('child_process');
 const { promisify } = require('util');
 const { MAX_DIFF_SIZE, GIT_COMMAND_TIMEOUT } = require('./constants');
+const { shouldProcessFile } = require('./file-filter');
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Get the git repository root for a workspace folder
@@ -21,7 +23,7 @@ async function getGitRepositoryRoot(workspacePath) {
       maxBuffer: 1024 * 1024
     });
     return stdout.trim();
-  } catch (error) {
+  } catch {
     console.log('Not a git repository:', workspacePath);
     return null;
   }
@@ -34,7 +36,6 @@ async function getGitRepositoryRoot(workspacePath) {
  */
 async function hasChanges(repoRoot) {
   try {
-    // Check for both staged and unstaged changes
     const { stdout } = await execAsync('git status --porcelain', {
       cwd: repoRoot,
       timeout: GIT_COMMAND_TIMEOUT,
@@ -55,65 +56,93 @@ async function hasChanges(repoRoot) {
 async function getAllRepositoryDiff(repoRoot) {
   try {
     let combinedDiff = '';
-    
-    // Get unstaged changes (working directory vs index)
+
     try {
       const unstagedResult = await execAsync('git diff', {
         cwd: repoRoot,
         timeout: 10000,
         maxBuffer: MAX_DIFF_SIZE
       });
-      
+
       if (unstagedResult.stdout && unstagedResult.stdout.trim().length > 0) {
         combinedDiff += '=== UNSTAGED CHANGES ===\n\n';
         combinedDiff += unstagedResult.stdout;
         combinedDiff += '\n\n';
       }
     } catch (error) {
+      if (error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
+        throw new Error(`Unstaged changes exceed the maximum size of ${MAX_DIFF_SIZE / 1024 / 1024} MB.`);
+      }
       console.log('No unstaged changes or error getting unstaged diff');
     }
-    
-    // Get staged changes (index vs HEAD)
+
     try {
       const stagedResult = await execAsync('git diff --cached', {
         cwd: repoRoot,
         timeout: 10000,
         maxBuffer: MAX_DIFF_SIZE
       });
-      
+
       if (stagedResult.stdout && stagedResult.stdout.trim().length > 0) {
         combinedDiff += '=== STAGED CHANGES ===\n\n';
         combinedDiff += stagedResult.stdout;
         combinedDiff += '\n\n';
       }
     } catch (error) {
+      if (error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
+        throw new Error(`Staged changes exceed the maximum size of ${MAX_DIFF_SIZE / 1024 / 1024} MB.`);
+      }
       console.log('No staged changes or error getting staged diff');
     }
-    
-    // Get untracked files
+
     try {
-      const untrackedResult = await execAsync('git ls-files --others --exclude-standard', {
+      const untrackedResult = await execAsync('git ls-files --others --exclude-standard -z', {
         cwd: repoRoot,
         timeout: GIT_COMMAND_TIMEOUT,
         maxBuffer: 1024 * 1024
       });
-      
-      if (untrackedResult.stdout && untrackedResult.stdout.trim().length > 0) {
-        const untrackedFiles = untrackedResult.stdout.trim().split('\n');
-        combinedDiff += '=== UNTRACKED FILES ===\n\n';
-        combinedDiff += untrackedFiles.join('\n');
+
+      const untrackedFiles = untrackedResult.stdout.split('\0').filter(Boolean);
+      const untrackedDiffs = [];
+
+      for (const filePath of untrackedFiles) {
+        if (!shouldProcessFile(filePath)) {
+          continue;
+        }
+
+        try {
+          await execFileAsync('git', ['diff', '--no-index', '--', '/dev/null', filePath], {
+            cwd: repoRoot,
+            timeout: 10000,
+            maxBuffer: MAX_DIFF_SIZE
+          });
+        } catch (error) {
+          if (error.code === 1 && typeof error.stdout === 'string' && error.stdout.trim()) {
+            untrackedDiffs.push(error.stdout);
+          } else if (error.code === 'ERR_CHILD_PROCESS_STDIO_MAXBUFFER') {
+            throw new Error(`Untracked file "${filePath}" exceeds the maximum diff size.`);
+          } else {
+            throw error;
+          }
+        }
+      }
+
+      if (untrackedDiffs.length > 0) {
+        combinedDiff += '=== UNTRACKED CHANGES ===\n\n';
+        combinedDiff += untrackedDiffs.join('\n');
         combinedDiff += '\n\n';
       }
     } catch (error) {
-      console.log('No untracked files or error getting untracked files');
+      console.error('Error getting untracked files:', error);
+      throw error;
     }
-    
-    // Check combined diff size
-    if (combinedDiff.length > MAX_DIFF_SIZE) {
-      console.warn('Combined diff too large:', combinedDiff.length, 'bytes');
-      throw new Error(`Changes are too large (${(combinedDiff.length / 1024 / 1024).toFixed(2)} MB). Maximum size is ${MAX_DIFF_SIZE / 1024 / 1024} MB.`);
+
+    const combinedDiffSize = Buffer.byteLength(combinedDiff, 'utf8');
+    if (combinedDiffSize > MAX_DIFF_SIZE) {
+      console.warn('Combined diff too large:', combinedDiffSize, 'bytes');
+      throw new Error(`Changes are too large (${(combinedDiffSize / 1024 / 1024).toFixed(2)} MB). Maximum size is ${MAX_DIFF_SIZE / 1024 / 1024} MB.`);
     }
-    
+
     return combinedDiff.trim();
   } catch (error) {
     console.error('Error getting repository diff:', error);
@@ -133,7 +162,7 @@ async function getChangesSummary(repoRoot) {
       timeout: GIT_COMMAND_TIMEOUT,
       maxBuffer: 1024 * 1024
     });
-    
+
     const lines = stdout.trim().split('\n').filter(line => line.length > 0);
     const summary = {
       total: lines.length,
@@ -143,7 +172,7 @@ async function getChangesSummary(repoRoot) {
       renamed: 0,
       untracked: 0
     };
-    
+
     for (const line of lines) {
       const status = line.substring(0, 2);
       if (status.includes('M')) summary.modified++;
@@ -152,7 +181,7 @@ async function getChangesSummary(repoRoot) {
       if (status.includes('R')) summary.renamed++;
       if (status.includes('?')) summary.untracked++;
     }
-    
+
     return summary;
   } catch (error) {
     console.error('Error getting changes summary:', error);

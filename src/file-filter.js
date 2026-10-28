@@ -22,7 +22,10 @@ function shouldProcessFile(filePath) {
   // Skip files in node_modules, .git, and other common ignore directories
   const normalizedPath = filePath.replace(/\\/g, '/');
   
-  if (IGNORE_PATTERNS.some(pattern => normalizedPath.includes(pattern))) {
+  if (IGNORE_PATTERNS.some(pattern => {
+    const relativePattern = pattern.startsWith('/') ? pattern.slice(1) : pattern;
+    return normalizedPath.includes(pattern) || normalizedPath.startsWith(relativePattern);
+  })) {
     console.log('Skipping ignored directory:', filePath);
     return false;
   }
